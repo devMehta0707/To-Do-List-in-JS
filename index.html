@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+
+</head>
+
+<body>
+    <div class="card text-center">
+        <div class="card-header">
+            TO-DO LIST
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">To-Do List For All Users</h5>
+            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+            <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#staticBackdrop">Add New</a>
+        </div>
+        <div id="appendData" class="list-group">
+            <!-- <a href="#" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">List group item heading</h5>
+                    <small class="ml-auto">3 days ago</small>
+                    <div class="ml-2">
+                        <button type="button" class="btn btn-warning">Edit</button>
+                        <button type="button" class="btn btn-danger">Delete</button>
+                        <button type="button" class="btn btn-success">Mark As Done</button>
+                    </div>
+                </div>
+                <p class="mb-1">Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore vel laudantium
+                    aperiam suscipit tenetur. Fugiat ducimus minima necessitatibus, voluptatibus beatae odit et sit,
+                    tempora sequi consectetur, voluptates expedita nemo quibusdam a sapiente.</p>
+            </a> -->
+        </div>
+        <div class="card-footer text-muted">
+            2 days ago
+        </div>
+    </div>
+
+    <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: jQuery and Bootstrap Bundle (includes Popper) -->
+    
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+    crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Add To-Do</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="toDoForm">
+                        <div class="form-group">
+                            <label>Heading</label>
+                            <input id="heading" type="text" class="form-control" value="">
+                            <label id="heading-error" for=""></label>
+                        </div>
+                        <div class="form-group">
+                            <label>Content</label>
+                            <input id="content" type="text" class="form-control" value="">
+                            <label id="content-error" for=""></label>
+                        </div>
+                        <button id="addToDoBtn" onclick="addNewToDo()" type="button"
+                            class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <!-- <button type="button" class="btn btn-primary">Understood</button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let userToDo = [];
+        let id;
+    
+        function getUserToDo() {
+            userToDo = JSON.parse(localStorage.getItem("userToDo")) || [];
+            id = (userToDo.length > 0 ? userToDo[userToDo.length - 1].id + 1 : 1);
+            console.log('id: ', id);
+    
+            let addToListDiv = document.getElementById('appendData');
+            if (userToDo.length > 0) {
+                userToDo.forEach(value => {
+                    addToListDiv.appendChild(createToDoElement(value));
+                });
+            } else {
+                addToListDiv.innerHTML = `<a href="#" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">No To Do Found</h5>
+                    </div>
+                </a>`;
+            }
+        }
+    
+        function createToDoElement(value) {
+            const item = document.createElement('a');
+            item.href = "#";
+            item.classList.add('list-group-item', 'list-group-item-action');
+            if (value.completed) {
+                item.classList.add('bg-secondary', 'text-white');
+            }
+    
+            const content = `
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">${value.heading}</h5>
+                    <small class="ml-auto">3 days ago</small>
+                    <div class="ml-2">
+                        <button type="button" data-id="${value.id}" class="btn btn-warning">Edit</button>
+                        <button type="button" data-id="${value.id}" class="btn btn-danger" onclick="deleteToDo(${value.id},event)">Delete</button>
+                        <button type="button" data-id="${value.id}" onclick="markDone(${value.id},event)" class="btn btn-success ${value.completed ? 'disabled' : ''}">${value.completed ? 'Completed' : 'Mark As Done'}</button>
+                    </div>
+                </div>
+                <p class="mb-1">${value.content}</p>
+            `;
+    
+            item.innerHTML = content;
+            return item;
+        }
+    
+        function addNewToDo() {
+            const headingInput = document.getElementById('heading');
+            const contentInput = document.getElementById('content');
+    
+            const heading = headingInput.value.trim();
+            const content = contentInput.value.trim();
+    
+            const headingError = document.getElementById('heading-error');
+            const contentError = document.getElementById('content-error');
+            
+            if (heading === '') {
+                headingError.innerHTML = "Please Enter Heading";
+            } else {
+                headingError.innerHTML = "";
+            }
+    
+            if (content === '') {
+                contentError.innerHTML = "Please Enter Content";
+            } else {
+                contentError.innerHTML = "";
+            }
+    
+            if (heading === '' || content === '') {
+                return false;
+            }
+    
+            const addToListDiv = document.getElementById('appendData');
+            const objectToStore = {
+                id: id,
+                heading: heading,
+                content: content,
+                completed: false,
+                createdAt: moment().format('DD-MM-yyyy hh:mm:ss')
+            };
+            
+            const newItem = createToDoElement(objectToStore);
+            addToListDiv.appendChild(newItem);
+            
+            userToDo.push(objectToStore);
+            localStorage.setItem("userToDo", JSON.stringify(userToDo));
+            id++;
+            $('.modal').modal('hide');
+        }
+    
+        function deleteToDo(toDoId, event) {
+            event.target.closest('a').remove();
+            const index = userToDo.findIndex(item => item.id === toDoId);
+            userToDo.splice(index, 1);
+            localStorage.setItem("userToDo", JSON.stringify(userToDo));
+        }
+    
+        function markDone(toDoId, event) {
+            event.target.innerHTML = "Completed";
+            event.target.classList.add('disabled');
+            event.target.closest('a').classList.add('bg-secondary', 'text-white');
+            const index = userToDo.findIndex(item => item.id === toDoId);
+            userToDo[index].completed = true;
+            localStorage.setItem("userToDo", JSON.stringify(userToDo));
+        }
+    
+        getUserToDo();
+    </script>
+    
+    
+</body>
+
+</html>
