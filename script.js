@@ -33,7 +33,7 @@ function createToDoElement(value) {
                     <h5 class="mb-1">${value.heading}</h5>
                     <small class="ml-auto">3 days ago</small>
                     <div class="ml-2">
-                        <button type="button" data-id="${value.id}" class="btn btn-warning" onclick="editToDo(event)">Edit</button>
+                        <button type="button" data-id="${value.id}" class="btn btn-warning" onclick="editToDo(${value.id},event)">Edit</button>
                         <button type="button" data-id="${value.id}" class="btn btn-danger" onclick="deleteToDo(${value.id},event)">Delete</button>
                         <button type="button" data-id="${value.id}" onclick="markDone(${value.id},event)" class="btn btn-success ${value.completed ? 'disabled' : ''}">${value.completed ? 'Completed' : 'Mark As Done'}</button>
                     </div>
@@ -104,17 +104,31 @@ function markDone(toDoId, event) {
     userToDo[index].completed = true;
     localStorage.setItem("userToDo", JSON.stringify(userToDo));
 }
-
-function editToDo(e){
+function editToDo(toDoId, e) {
     let heading = e.target.closest('div').parentElement.firstElementChild.innerHTML;
     let content = e.target.closest('div').parentElement.nextElementSibling.innerHTML;
-    document.getElementById('edit-heading').value = heading;
-    document.getElementById('edit-content').value = content;
+    const editHeading = document.getElementById('edit-heading').value = heading;
+    const editContent = document.getElementById('edit-content').value = content;
+    document.getElementById('editToDoId').value = toDoId;
     $('#staticBackdrop2').modal('show');
 }
 
-function submitEditToDo(e){
-    
+function submitEditToDo(e) {
+    let toDoId = document.getElementById('editToDoId').value;
+    console.log('toDoId: ', toDoId);
+    const index = userToDo.findIndex(item => item.id == toDoId);
+    console.log('index: ', index);
+    const editHeading = document.getElementById('edit-heading').value;
+    const editContent = document.getElementById('edit-content').value;
+    userToDo[index].heading = editHeading
+    userToDo[index].content = editContent
+    localStorage.setItem("userToDo", JSON.stringify(userToDo))
+
+    const targetDiv = document.getElementById('appendData');
+    const updatedElement = createToDoElement(userToDo[index]);
+    const existingElement = targetDiv.getElementsByClassName('list-group-item')[index];
+    targetDiv.replaceChild(updatedElement, existingElement);
+    $('#staticBackdrop2').modal('hide');
 }
 
 getUserToDo();
