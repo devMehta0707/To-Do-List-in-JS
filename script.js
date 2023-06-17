@@ -11,6 +11,7 @@ function getUserToDo() {
         userToDo.forEach(value => {
             addToListDiv.appendChild(createToDoElement(value));
         });
+        document.getElementById('lastAddedTime').innerHTML = `Latest Added ${moment(userToDo[userToDo.length - 1].createdAt).calendar()}`
     } else {
         addToListDiv.innerHTML = `<a href="#" class="list-group-item list-group-item-action">
                     <div class="d-flex w-100 justify-content-between">
@@ -31,9 +32,9 @@ function createToDoElement(value) {
     const content = `
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">${value.heading}</h5>
-                    <small class="ml-auto">3 days ago</small>
+                    <small class="ml-auto">Added ${moment(value.createdAt).calendar()}</small>
                     <div class="ml-2">
-                        <button type="button" data-id="${value.id}" class="btn btn-warning" onclick="editToDo(${value.id},event)">Edit</button>
+                        <button type="button" data-id="${value.id}" class="btn btn-warning ${value.completed ? 'disabled' : ''}" onclick="${value.completed ? '' : 'editToDo(' + value.id + ', event)'}">Edit</button>
                         <button type="button" data-id="${value.id}" class="btn btn-danger" onclick="deleteToDo(${value.id},event)">Delete</button>
                         <button type="button" data-id="${value.id}" onclick="markDone(${value.id},event)" class="btn btn-success ${value.completed ? 'disabled' : ''}">${value.completed ? 'Completed' : 'Mark As Done'}</button>
                     </div>
@@ -77,16 +78,19 @@ function addNewToDo() {
         heading: heading,
         content: content,
         completed: false,
-        createdAt: moment().format('DD-MM-yyyy hh:mm:ss')
+        createdAt: moment()
     };
 
     const newItem = createToDoElement(objectToStore);
     addToListDiv.appendChild(newItem);
-
+    if (userToDo.length == 0) {
+        addToListDiv.firstElementChild.remove();
+    }
     userToDo.push(objectToStore);
     localStorage.setItem("userToDo", JSON.stringify(userToDo));
     id++;
     $('.modal').modal('hide');
+    document.getElementById('lastAddedTime').innerHTML = `Last Added ${moment().calendar()}`;
 }
 
 function deleteToDo(toDoId, event) {
@@ -94,6 +98,13 @@ function deleteToDo(toDoId, event) {
     const index = userToDo.findIndex(item => item.id === toDoId);
     userToDo.splice(index, 1);
     localStorage.setItem("userToDo", JSON.stringify(userToDo));
+    if (userToDo.length == 0) {
+        document.getElementById('appendData').innerHTML = `<a href="#" class="list-group-item list-group-item-action">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">No To Do Found</h5>
+        </div>
+    </a>`;
+    }
 }
 
 function markDone(toDoId, event) {
